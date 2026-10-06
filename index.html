@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="bn" data-t="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Chat</title>
+<script>
+function rt(t){t=t||"dark";if(t==="auto")t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.dataset.t=t}
+var _t="dark";try{_t=localStorage.getItem("t")||"dark"}catch(e){}rt(_t);
+</script>
+<style>
+:root{color-scheme:light;--bg:#fff;--sf:#f0f4f9;--sf2:#e4eaf2;--tx:#1f1f1f;--mu:#5f6368;--bd:#e1e5ea;--ac:#2f5be0;--send:#2f5be0;--ub:#e6ecf5;--ok:#188038;--er:#d93025;--glow:rgba(66,110,255,.16)}
+:root[data-t=dark]{color-scheme:dark;--bg:#000;--sf:#161618;--sf2:#1e1e22;--tx:#e8eaed;--mu:#9aa0a6;--bd:#2a2a30;--ac:#8aa4ff;--send:#22399c;--ub:#26262b;--ok:#4cd98a;--er:#ff7b72;--glow:rgba(45,80,220,.5)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 system-ui,-apple-system,"Noto Sans Bengali","Segoe UI",sans-serif;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer;text-align:inherit}
+h1,h2{margin:0;font-weight:500}
+.ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mu{color:var(--mu)}
+.page{position:fixed;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;background:var(--bg);padding-top:env(safe-area-inset-top)}
+.page.on{display:flex}
+.glow{position:absolute;left:-30%;right:-30%;bottom:-6%;height:68%;background:radial-gradient(55% 75% at 50% 100%,var(--glow),transparent 72%);pointer-events:none}
+.top{display:flex;align-items:center;gap:4px;padding:10px 12px;position:relative;z-index:2}
+.top h1{flex:1;font-size:21px;margin-left:6px}
+.ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ib:active,.it:active,.rw:active{background:var(--sf2)}
+.ttl{display:flex;align-items:center;gap:2px;font-size:20px;padding:6px 8px 6px 10px;border-radius:20px;min-width:0}
+.ttl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:44vw}
+.ttl .ic{width:20px;height:20px;color:var(--mu)}
+.sp{flex:1}
+.avb{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6f8bff,#b45cff 55%,#ff6fa5);color:#fff;font-weight:600;display:grid;place-items:center;margin:0 4px;flex:none}
+.mw{flex:1;position:relative;display:flex;flex-direction:column;min-height:0}
+#list{flex:1;overflow-y:auto;padding:8px 16px 14px;display:flex;flex-direction:column;gap:20px;position:relative;z-index:1}
+.m{max-width:100%;overflow-wrap:anywhere;animation:up .28s ease}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.m.user{align-self:flex-end;max-width:84%;background:var(--ub);padding:10px 16px;border-radius:22px 22px 6px 22px;white-space:pre-wrap}
+.star{width:24px;height:24px;display:block;margin-bottom:6px}
+.m div{min-height:1.6em}.m .spc{min-height:.45em}
+.m .h{font-weight:700;margin-top:4px}.m .q{border-left:3px solid var(--ac);padding-left:10px;color:var(--mu)}
+.m pre{background:var(--sf);padding:12px;border-radius:14px;overflow-x:auto;font-size:13px;margin:8px 0}
+.m code{font-family:ui-monospace,monospace;font-size:.92em}.m a{color:var(--ac)}
+.acts{display:flex;margin-top:4px;color:var(--mu)}.acts button{width:36px;height:36px;border-radius:50%;display:grid;place-items:center}.acts .ic{width:19px;height:19px}
+.think{display:flex;align-items:center;gap:20px;color:var(--mu)}.think .pf{margin:0}.think .star{margin:0;animation:starx 2.6s cubic-bezier(.45,.05,.55,.95) infinite}
+@keyframes starx{0%{transform:rotate(0) scale(.92)}50%{transform:rotate(180deg) scale(1.12)}100%{transform:rotate(360deg) scale(.92)}}
+#empty{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 26px 70px;z-index:1;pointer-events:none}
+#empty>*{pointer-events:auto}
+#empty .star{width:58px;height:58px;margin:0}
+#empty .big{font-size:31px;line-height:1.3;margin:22px 0 6px;font-weight:400}
+#empty .small{color:var(--mu);font-size:17px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+.chips button{background:var(--sf);padding:9px 16px;border-radius:99px;font-size:15px}
+.chips button:active{background:var(--sf2)}
+#dn{position:absolute;right:16px;bottom:10px;width:42px;height:42px;border-radius:50%;background:var(--sf2);display:none;place-items:center;z-index:3;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+#dn.on{display:grid}
+.foot{padding:6px 12px calc(12px + env(safe-area-inset-bottom));position:relative;z-index:2}
+.pill{display:flex;align-items:flex-end;gap:2px;background:var(--sf);border-radius:30px;padding:7px 7px 7px 6px}
+.pill .ib{width:42px;height:42px}
+#inp{flex:1;min-width:0;resize:none;max-height:140px;border:0;background:none;color:var(--tx);font:inherit;font-size:17px;outline:0;padding:9px 6px;line-height:1.4}
+#inp::placeholder{color:var(--mu)}
+#snd{width:44px;height:44px;border-radius:50%;background:var(--send);color:#fff;display:grid;place-items:center;transition:opacity .2s;flex:none}
+#snd:disabled{opacity:.35}
+.ban{background:var(--sf);border-radius:18px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;font-size:14.5px}
+.ban[hidden],#conn[hidden]{display:none}
+#conn{background:var(--er);color:#fff;text-align:center;font-size:13px;padding:4px}#conn.demo{background:var(--send)}
+#scrim{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+#scrim.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:min(86vw,340px);background:var(--bg);z-index:21;transform:translateX(-102%);transition:transform .27s ease;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);border-right:1px solid var(--bd)}
+#drawer.on{transform:none}
+.dh{display:flex;align-items:center;padding:12px 12px 6px 22px}.dh h2{flex:1;font-size:24px}
+.dr{display:flex;align-items:center;gap:18px;padding:14px 20px;margin:0 8px;border-radius:99px;font-size:17px;width:calc(100% - 16px)}
+.dr.hl{background:var(--sf)}.dr:active{background:var(--sf2)}
+.srch{display:flex;align-items:center;gap:14px;margin:4px 8px;padding:10px 20px;border-radius:99px}
+.srch input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--tx);font:inherit;font-size:17px}
+.dsec{color:var(--mu);font-size:15px;padding:18px 28px 6px}
+#dscroll{flex:1;overflow-y:auto}
+.rw{display:flex;align-items:center;margin:0 8px;padding:0 4px 0 20px;border-radius:99px;min-height:48px}
+.rw .rt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16.5px}
+.rw.cur{background:var(--sf)}.rw .rm{width:40px;height:40px;display:grid;place-items:center;color:var(--mu)}
+.dfoot{display:flex;align-items:center;gap:14px;padding:12px 14px calc(14px + env(safe-area-inset-bottom)) 18px;border-top:1px solid var(--bd)}
+.dfoot .nmx{flex:1;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--sf);z-index:21;transform:translateY(105%);transition:transform .28s ease;border-radius:30px 30px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom))}
+#sheet.on{transform:none}
+.grab{width:40px;height:4px;border-radius:9px;background:var(--bd);margin:0 auto 14px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tiles button{background:var(--sf2);border-radius:20px;padding:14px 6px;text-align:center;font-size:14px}
+.tiles .tb{display:grid;place-items:center;width:50px;height:50px;margin:2px auto 9px;border-radius:17px;transition:transform .15s ease}.tiles .tb .ic{width:25px;height:25px;stroke-width:1.7}.tiles button:active .tb{transform:scale(.92)}.tiles button{font-weight:500}
+.body{flex:1;overflow-y:auto;padding:6px 14px 40px}
+.grp{border-radius:28px;overflow:hidden;display:flex;flex-direction:column;gap:2px;margin:0 0 16px}
+.it{display:flex;align-items:center;gap:18px;background:var(--sf);padding:18px 20px;width:100%;font-size:17px}
+.it>i{display:flex}.dr>i{display:flex}.it .t{flex:1}.it small{display:block;color:var(--mu);font-size:13px;line-height:1.35}
+.it.red{color:var(--er)}
+.sec{color:var(--mu);font-size:14px;margin:20px 10px 8px}
+.note{color:var(--mu);font-size:13.5px;margin:6px 8px 12px;line-height:1.55}
+.card{background:var(--sf);border-radius:24px;padding:16px}
+.field{width:100%;border:0;background:var(--bg);color:var(--tx);border-radius:14px;padding:13px 16px;font:inherit;font-size:16px;outline:0;margin:6px 0 12px}
+.lbl{font-size:13px;color:var(--mu);margin-left:4px}
+.btn{background:var(--send);color:#fff;padding:13px 22px;border-radius:99px;font-weight:600;display:inline-block;text-align:center;text-decoration:none}
+.btn.g{background:var(--sf2);color:var(--tx);font-weight:500}.btn:disabled{opacity:.4}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 14px}
+.tile{background:var(--bg);border-radius:20px;padding:18px 8px;text-align:center;border:2px solid transparent;font-size:16px}
+.tile b{display:block;font-size:30px;font-weight:400}.tile.on{border-color:var(--ac)}
+.bigav{width:84px;height:84px;font-size:34px;margin:6px auto 14px}
+.chk{color:var(--ac);opacity:0}.on>.chk{opacity:1}
+.kc{background:var(--sf);padding:14px 16px}
+.kh{display:flex;align-items:center;gap:12px}.kh .t{flex:1}.kh small{display:block;color:var(--mu);font-size:13px}
+.pv{width:38px;height:38px;border-radius:50%;background:var(--sf2);display:grid;place-items:center;font-weight:600}
+.chip{font-size:12px;padding:3px 10px;border-radius:99px;background:var(--bg);color:var(--ok)}.chip.w{color:var(--er)}.chip.o{color:var(--mu)}
+.ka{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.ka button{padding:7px 14px;border-radius:99px;background:var(--bg);font-size:14px}
+details{background:var(--sf);padding:16px 18px}summary{font-weight:600;cursor:pointer}ol{margin:10px 0 12px 18px;padding:0}li{margin:6px 0}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:14.5px;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:90%;text-align:center}
+#toast.on{opacity:.96}
+#dlg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:24px}
+#dlg.on{display:flex}
+#dlg .bx{background:var(--sf2);border-radius:28px;padding:24px;width:100%;max-width:340px}
+#dlg p{margin:0 0 20px;font-size:17px}#dlg .r{display:flex;justify-content:flex-end;gap:8px}
+#dlg .r button{padding:10px 20px;border-radius:99px;font-weight:600}
+#dlg-i{width:100%;box-sizing:border-box;padding:12px 16px;margin:-6px 0 18px;border-radius:14px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit;font-size:16px;outline:none}#dlg-i:focus{border-color:var(--ac)}
+#rmenu{position:fixed;z-index:70;background:var(--sf2);border:1px solid var(--bd);border-radius:18px;padding:6px;min-width:190px;box-shadow:0 12px 36px rgba(0,0,0,.35);display:none}#rmenu.on{display:block}#rmenu button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:12px;font-size:15.5px;color:var(--tx);text-align:left}#rmenu button:active{background:var(--sf)}#rmenu .ic{width:20px;height:20px;color:var(--mu)}#rmenu .dg,#rmenu .dg .ic{color:var(--er)}
+#mpick{position:fixed;top:68px;left:12px;width:min(340px,calc(100% - 24px));max-height:60vh;overflow:auto;background:var(--sf2);border:1px solid var(--bd);border-radius:22px;padding:8px;z-index:60;display:none;box-shadow:0 12px 40px rgba(0,0,0,.5)}#mpick.on{display:block}#mpick button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;font-size:15px;color:var(--tx)}#mpick button:active{background:var(--sf)}#mpick small{display:block;color:var(--mu);font-size:12px}#mpick .ck{margin-left:auto;color:var(--ok)}#mpick hr{border:0;border-top:1px solid var(--bd);margin:6px 0}.pf{display:block;width:30px;height:30px;margin-bottom:8px;position:relative}.pf .star{margin:0}
+html.hasav #av,html.hasav #d-av,html.hasav #c-av{background:var(--avu) center/cover no-repeat;color:transparent}
+html.hasav .pf{background:var(--avu) center/cover no-repeat;border-radius:50%;box-shadow:0 0 0 1px var(--bd)}html.hasav .pf .star{display:none}
+.m.bot>.pf{animation:pfin .6s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pfin{from{opacity:0;transform:scale(.4) rotate(-40deg)}to{opacity:1;transform:none}}
+.think .pf{width:32px;height:32px;border-radius:50%;animation:breathe 2s cubic-bezier(.4,0,.4,1) infinite}
+.think>span:last-child{font-weight:500;background:linear-gradient(100deg,var(--mu) 30%,var(--tx) 50%,var(--mu) 70%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:shim 1.8s linear infinite}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.82;box-shadow:0 0 0 0 rgba(138,164,255,0)}50%{transform:scale(1.09);opacity:1;box-shadow:0 0 22px 3px rgba(138,164,255,.38)}}
+@keyframes shim{from{background-position:120% 0}to{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.think .pf,.think .star,.think>span:last-child{animation-duration:6s!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b8cff"/><stop offset=".5" stop-color="#a470ff"/><stop offset="1" stop-color="#ff7ab0"/></linearGradient></defs>
+<symbol id="star" viewBox="0 0 24 24"><path fill="url(#gg)" d="M12 0C12.8 6.7 17.3 11.2 24 12 17.3 12.8 12.8 17.3 12 24 11.2 17.3 6.7 12.8 0 12 6.7 11.2 11.2 6.7 12 0Z"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></symbol>
+<symbol id="i-new" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-1 .7-1.5 1.2-1.5 2.5M12 17h.01"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+<symbol id="i-mem" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/></symbol>
+<symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 004 0"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h10"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="19" r="1.4" fill="currentColor"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></symbol>
+<symbol id="i-alarm" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5"/><path d="M12 9v4.2l2.6 1.8M4.5 4.5L2.5 6.5M19.5 4.5l2 2"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></symbol>
+<symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.5 18h5M10.2 21h3.6M12 3a6 6 0 00-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0012 3z"/></symbol>
+<symbol id="i-text" viewBox="0 0 24 24"><path d="M3 19l5-12 5 12M5 14.5h6M15 19l3-7 3 7M16.2 17h3.6"/></symbol>
+<symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4.5 4.5 0 007 0M9 9.5h.01M15 9.5h.01"/></symbol>
+<symbol id="i-clip" viewBox="0 0 24 24"><path d="M21.4 11l-9.2 9.2a6 6 0 01-8.5-8.5l9.2-9.2a4 4 0 015.7 5.7l-9.2 9.2a2 2 0 01-2.8-2.8l8.5-8.5"/></symbol>
+</svg>
+
+<!-- চ্যাট -->
+<section class="page on" id="p-chat">
+  <div class="glow"></div>
+  <div id="conn" hidden>ব্রেইনের সাথে যোগাযোগ হচ্ছে না… আবার চেষ্টা চলছে</div>
+  <div class="top">
+    <button class="ib" id="menu" data-i="menu" aria-label="মেনু"></button>
+    <button class="ttl" id="ttl"><span id="nm">…</span><i data-i="down"></i></button>
+    <span class="sp"></span>
+    <button class="ib" id="newc" data-i="new" aria-label="নতুন চ্যাট"></button>
+    <button class="avb" id="av" aria-label="সেটিংস">দ</button>
+  </div>
+  <div class="mw">
+    <div id="list"><div class="m bot" id="dots" style="display:none"><div class="think"><span class="pf"><svg class="star"><use href="#star"/></svg></span><span>ভাবছি…</span></div></div></div>
+    <div id="empty">
+      <svg class="star"><use href="#star"/></svg>
+      <div class="big" id="g1"></div><div class="small" id="g2"></div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <button id="dn" data-i="arrow" aria-label="নিচে"></button>
+  </div>
+  <div class="foot">
+    <div class="ban" id="ban" hidden><span style="flex:1">চ্যাট শুরু করতে একটা API key দরকার</span><button class="btn" style="padding:8px 16px;font-size:14px" id="ban-go">যোগ করো</button></div>
+    <div class="pill">
+      <button class="ib" id="plus" data-i="plus" aria-label="টুলস"></button>
+      <textarea id="inp" rows="1" placeholder="মেসেজ লেখো…"></textarea>
+      <button id="snd" data-i="send" disabled aria-label="পাঠাও"></button>
+    </div>
+  </div>
+</section>
+
+<!-- সেটিংস মেনু -->
+<section class="page" id="p-settings">
+  <div class="top"><button class="ib" data-i="back" onclick="history.back()"></button><h1>সেটিংস</h1></div>
+  <div class="body">
+    <div class="grp">
+      <button class="it" id="s-char"><i data-i="user"></i><span class="t">চরিত্র ও নাম<small id="s-char-s"></small></span><i data-i="right" class="mu"></i></button>
+      <button class="it" id="s-theme"><i data-i="drop"></i><span class="t">থিম<small id="s-theme-s"></small></span><i data-i="right" class="mu"></i></button>
+    </div>
+    <div class="grp">
+      <button class="it" id="s-keys"><i data-i="key"></i><span class="t">API key ম্যানেজার<small id="s-keys-s"></small></span><i data-i="right" class="mu"></i></button>
+      <button class="it" id="s-guide"><i data-i="help"></i><span class="t">কীভাবে key পাবো?</span><i data-i="right" class="mu"></i></button>
+    </div>
+    <div class="grp">
+      <button class="it" id="s-mem"><i data-i="mem"></i><span class="t">স্মৃতি দেখো</span></button>
+      <button class="it red" id="s-clr"><i data-i="trash"></i><span class="t">এই চ্যাট মুছে ফেলো</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- চরিত্র -->
+<section class="page" id="p-char">
+  <div class="top"><button class="ib" data-i="back" onclick="history.back()"></button><h1>চরিত্র ও নাম</h1></div>
+  <div class="body">
+    <div class="avb bigav" id="c-av">দ</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin:10px 0 4px"><button class="btn g" id="c-ph">📷 ছবি বাছাই</button><button class="btn g" id="c-ph-x">ছবি সরাও</button></div>
+    <input type="file" id="av-file" accept="image/*" hidden>
+    <div class="card">
+      <div class="lbl">চরিত্রের নাম</div><input class="field" id="c-name" maxlength="30" autocomplete="off">
+      <div class="lbl">চরিত্র</div>
+      <div class="two" id="g-tiles"><button class="tile" data-g="female"><b>♀</b>মেয়ে</button><button class="tile" data-g="male"><b>♂</b>ছেলে</button></div>
+      <div class="lbl">তোমার নাম (ঐচ্ছিক — সে তোমাকে এই নামে ডাকবে)</div><input class="field" id="c-user" maxlength="30" autocomplete="off" style="margin-bottom:4px">
+    </div>
+    <div class="note">নাম বা চরিত্র বদলালে এই চ্যাটের আগের কথোপকথন মডেল ভুলে যায়। স্মৃতি, নোট ও ডায়েরি থেকে যায়।</div>
+    <button class="btn" id="c-save" style="width:100%">সেভ করো</button>
+  </div>
+</section>
+
+<!-- থিম -->
+<section class="page" id="p-theme">
+  <div class="top"><button class="ib" data-i="back" onclick="history.back()"></button><h1>থিম</h1></div>
+  <div class="body"><div class="grp" id="t-list">
+    <button class="it" data-t="dark"><span class="t">ডার্ক</span><i data-i="check" class="chk"></i></button>
+    <button class="it" data-t="light"><span class="t">লাইট</span><i data-i="check" class="chk"></i></button>
+    <button class="it" data-t="auto"><span class="t">ফোনের সেটিং অনুযায়ী</span><i data-i="check" class="chk"></i></button>
+  </div></div>
+</section>
+
+<!-- key ম্যানেজার -->
+<section class="page" id="p-adv">
+  <div class="top"><button class="ib" data-i="back" onclick="history.back()"></button><h1>API key ম্যানেজার</h1></div>
+  <div class="body">
+    <div class="note">যত ইচ্ছে API যোগ করো (সর্বোচ্চ <span id="mx">50</span>টা)। ওপরেরটা ডিফল্ট ও সেরা। তার লিমিট শেষ হলে নিজে থেকে পরেরটা চলে, লিমিট ফিরলে আবার ওপরেরটায় ফেরে। কোনোটায় ক্লিক করে "ব্যবহার করো" চাপলে সেটাই ডিফল্ট হবে। 🔎 চালু করা API ওয়েব সার্চের কাজে আগে ব্যবহার হয়।</div>
+    <div class="grp" id="kl"></div>
+    <div class="sec">নতুন key যোগ</div>
+    <div class="card">
+      <select class="field" id="k-prov"><option value="groq">Groq</option><option value="gemini">Google Gemini</option><option value="mistral">Mistral</option><option value="openrouter">OpenRouter</option><option value="openai">OpenAI</option><option value="deepseek">DeepSeek</option><option value="custom">অন্য যেকোনো API</option></select>
+      <input class="field" id="k-name" placeholder="নাম (যেমন: আমার Groq)" autocomplete="off">
+      <input class="field" id="k-model" placeholder="মডেলের নাম (ফাঁকা রাখলে ডিফল্ট)" autocapitalize="off" autocomplete="off" spellcheck="false">
+      <input class="field" id="k-url" placeholder="API ঠিকানা, যেমন https://api.example.com/v1" autocapitalize="off" autocomplete="off" spellcheck="false" style="display:none">
+      <input class="field" id="k-key" placeholder="key এখানে পেস্ট করো" autocapitalize="off" autocomplete="off" spellcheck="false">
+      <label style="display:flex;gap:8px;align-items:center;margin:0 0 14px;font-size:14px"><input type="checkbox" id="k-search"> ওয়েব সার্চের কাজে আগে ব্যবহার হবে</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="k-add">যোগ করো</button><button class="btn g" id="k-help">key কোথায় পাবো?</button></div>
+    </div>
+    <div style="margin:16px 0 0"><button class="btn g" id="k-unb">সীমা রিসেট করে আবার চেষ্টা</button></div>
+    <div class="note">key শুধু এই ফোনেই থাকে। কাউকে দেখিও না বা শেয়ার করো না।</div>
+  </div>
+</section>
+
+<!-- গাইড -->
+<section class="page" id="p-guide">
+  <div class="top"><button class="ib" data-i="back" onclick="history.back()"></button><h1>কীভাবে key পাবো?</h1></div>
+  <div class="body">
+    <div class="note">যেকোনো একটা দিয়েই শুরু করা যায়। বেশি যোগ করলে একটার লিমিট শেষ হলে আরেকটা চলবে। বিনামূল্যের নিয়ম ও সীমা সাইটে সাইটে বদলায়, তাই সাইটে দেখে নাও। বাটনের নাম একটু আলাদা হলে কাছাকাছি নামেরটা খোঁজো।</div>
+    <div class="grp">
+      <details open><summary>Groq (শুরুর জন্য সহজ)</summary><ol><li>নিচের বাটনে সাইট খুলে ইমেইল বা Google দিয়ে সাইন আপ করো।</li><li>"API Keys" পেজে যাও।</li><li>"Create API Key" চাপো, একটা নাম দাও।</li><li>যে key দেখাবে (সাধারণত gsk_ দিয়ে শুরু) পুরোটা কপি করো। পরে আর পুরো দেখা যায় না।</li><li>অ্যাপে এসে সার্ভিস "Groq" বেছে key পেস্ট করে "যোগ করো" চাপো।</li></ol><a class="btn" href="https://console.groq.com/keys">Groq সাইট খোলো</a></details>
+      <details><summary>Google Gemini</summary><ol><li>সাইট খুলে Google অ্যাকাউন্টে ঢোকো।</li><li>"Get API key" বা "Create API key" চাপো।</li><li>key কপি করো (সাধারণত AIza দিয়ে শুরু)।</li><li>অ্যাপে সার্ভিস "Google Gemini" বেছে পেস্ট করো।</li></ol><a class="btn" href="https://aistudio.google.com/apikey">Gemini সাইট খোলো</a></details>
+      <details><summary>Mistral</summary><ol><li>সাইটে সাইন আপ করো। প্ল্যান বা ওয়ার্কস্পেস বাছতে বললে বিনামূল্যেরটা নাও (ফোন যাচাই লাগতে পারে)।</li><li>"API Keys" অংশে "Create new key" চাপো।</li><li>key কপি করে অ্যাপে "Mistral" বেছে পেস্ট করো।</li></ol><a class="btn" href="https://console.mistral.ai/api-keys">Mistral সাইট খোলো</a></details>
+      <details><summary>OpenRouter</summary><ol><li>সাইটে সাইন আপ করো।</li><li>Keys পেজে গিয়ে "Create Key" চাপো।</li><li>key কপি করো (সাধারণত sk-or- দিয়ে শুরু)।</li><li>অ্যাপে "OpenRouter" বেছে পেস্ট করো। এটা ফ্রি মডেল (":free") ব্যবহার করে, যার সীমা কম হতে পারে।</li></ol><a class="btn" href="https://openrouter.ai/keys">OpenRouter সাইট খোলো</a></details>
+    </div>
+    <div class="note">সাইট খুললে ব্রাউজারে যাবে। key কপি করে আবার এই অ্যাপে ফিরে এসো।</div>
+  </div>
+</section>
+
+<!-- সাইড ড্রয়ার -->
+<div id="scrim"></div>
+<aside id="drawer">
+  <div class="dh"><h2>চ্যাট</h2><button class="ib" data-i="close" id="d-x"></button></div>
+  <button class="dr hl" id="d-new"><i data-i="new"></i>নতুন চ্যাট</button>
+  <div class="srch"><i data-i="search" class="mu"></i><input id="q" placeholder="চ্যাট খোঁজো" autocomplete="off"></div>
+  <div id="dscroll">
+    <div class="dsec">আমার জিনিস</div>
+    <button class="dr" data-q="নোট দেখাও"><i data-i="note"></i>নোট</button>
+    <button class="dr" data-q="রিমাইন্ডার দেখাও"><i data-i="bell"></i>রিমাইন্ডার</button>
+    <button class="dr" data-q="ডায়েরি"><i data-i="book"></i>ডায়েরি</button>
+    <div class="dsec">সাম্প্রতিক</div>
+    <div id="rec"></div>
+  </div>
+  <div class="dfoot"><div class="avb" id="d-av" style="margin:0">দ</div><span class="nmx" id="d-nm"></span><button class="ib" data-i="gear" id="d-set"></button></div>
+</aside>
+
+<!-- টুলস শিট -->
+<div id="mpick"></div>
+<div id="sheet"><div class="grab"></div><div class="tiles" id="tiles"></div></div>
+
+<div id="rmenu"></div>
+<div id="toast"></div>
+<div id="dlg"><div class="bx"><p id="dlg-m"></p><input id="dlg-i" style="display:none" maxlength="60" autocomplete="off"><div class="r"><button id="dlg-n" class="mu">না</button><button id="dlg-y" style="color:var(--ac)">হ্যাঁ</button></div></div></div>
+
+<script>
+const TOKEN="__TOKEN__",PH="__TOK"+"EN__";
+const DEMO=TOKEN===PH;   // সার্ভার ছাড়া (যেমন Acode প্রিভিউ) খুললে ডেমো মোড: ব্রাউজারের ভেতরেই নকল ব্রেইন
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const I=n=>`<svg class="ic"><use href="#i-${n}"/></svg>`;
+const PN={groq:"Groq",gemini:"Gemini",mistral:"Mistral",openrouter:"OpenRouter"};
+let last=0,sid=0,fails=0,busy=false,again=false,keysN=-1,draft={},ui={drawer:false,sheet:false};
+let cfg={name:"…",gender:"female",theme:_t,user_name:""};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function api(p,b,ms){
+  if(DEMO)return mock(p,b);
+  const c=new AbortController(),tm=setTimeout(()=>c.abort(),ms||15000);
+  try{
+    const r=await fetch(p,{method:b?"POST":"GET",headers:{"X-T":TOKEN,"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined,signal:c.signal});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    return await r.json();
+  }catch(e){throw new Error(e.name==="AbortError"?"সার্ভার সাড়া দিচ্ছে না":(e.message||"সংযোগ সমস্যা"))}
+  finally{clearTimeout(tm)}
+}
+async function pickFile(){if(DEMO){toast("ডেমো মোডে ফাইল পাঠানো যায় না");return}try{await api("/api/pick",{});toast("ছবি বা ফাইল বাছাই করো…")}catch(e){toast(e.message)}}
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("on"),2400)}
+function ask(msg){return new Promise(res=>{$("#dlg-m").textContent=msg;$("#dlg").classList.add("on");
+  const done=v=>{$("#dlg").classList.remove("on");res(v)};$("#dlg-y").onclick=()=>done(true);$("#dlg-n").onclick=()=>done(false)})}
+function askText(msg,val){return new Promise(res=>{const i=$("#dlg-i"),y=$("#dlg-y"),n=$("#dlg-n"),y0=y.textContent,n0=n.textContent;
+  $("#dlg-m").textContent=msg;i.style.display="block";i.value=val||"";y.textContent="সেভ";n.textContent="বাতিল";$("#dlg").classList.add("on");setTimeout(()=>{i.focus();i.select()},80);
+  const done=v=>{i.style.display="none";y.textContent=y0;n.textContent=n0;$("#dlg").classList.remove("on");res(v)};
+  y.onclick=()=>done(i.value.trim());n.onclick=()=>done(null);i.onkeydown=e=>{if(e.key==="Enter")done(i.value.trim())}})}
+window.addEventListener("unhandledrejection",e=>{if(e.reason&&e.reason.message)toast("ত্রুটি: "+e.reason.message)});
+window.addEventListener("error",e=>toast("ত্রুটি: "+e.message));
+
+
+/* ===== ডেমো মোড: Acode/ব্রাউজারে ডিজাইন ও বাটন পরীক্ষার জন্য নকল ব্রেইন (ডাটা localStorage-এ) ===== */
+let DB=null,dTyping=false;
+function dload(){
+  try{DB=JSON.parse(localStorage.getItem("demo")||"null")}catch(e){}
+  DB=DB||{cfg:{name:"দীপান্বিতা",gender:"female",theme:_t||"dark",user_name:""},keys:[],sess:[],active:0};
+  if(!DB.sess.find(x=>x.id===DB.active)){const id=Date.now();DB.sess.unshift({id,title:"",ts:Date.now(),msgs:[]});DB.active=id}
+}
+function dsave(){try{localStorage.setItem("demo",JSON.stringify(DB))}catch(e){}}
+const dcur=()=>DB.sess.find(x=>x.id===DB.active);
+function dpush(role,text,sess){
+  sess=sess||dcur();const m={id:(sess.msgs.length?sess.msgs[sess.msgs.length-1].id:0)+1,role,text,ts:Date.now()};
+  sess.msgs.push(m);sess.ts=Date.now();if(!sess.title)sess.title=text.replace(/\s+/g," ").slice(0,48);dsave();return m;
+}
+function dreply(t){
+  if(/^হিসাব\s*:/.test(t)){const e=t.split(":").slice(1).join(":").replace(/[^0-9+\-*\/(). ]/g,"");try{return e.trim()+" = "+Function('"use strict";return ('+e+')')()}catch(x){return "হিসাবটা বুঝিনি"}}
+  if(/^নোট\s*:/.test(t))return "নোট সেভ!! (ডেমো)";
+  if(!DB.keys.length)return "আগে সেটিংস → API key ম্যানেজার থেকে অন্তত একটা API key যোগ করো, তারপর কথা বলব!!";
+  return "(ডেমো মোড) তুমি লিখেছ: "+t+"\n\nআসল AI উত্তর APK বা run_local.py চালালে আসবে।";
+}
+const dmask=k=>k.length>10?k.slice(0,4)+"…"+k.slice(-4):"…";
+async function mock(p,b){
+  if(!DB)dload();
+  const u=new URL(p,location.href),path=u.pathname,q=u.searchParams;
+  if(path==="/api/messages"){
+    const after=+q.get("after")||0,sd=+q.get("sid")||0,c=dcur();
+    return sd!==c.id?{reset:true,sid:c.id,messages:c.msgs.slice(),typing:dTyping}:{reset:false,sid:c.id,messages:c.msgs.filter(m=>m.id>after),typing:dTyping};
+  }
+  if(path==="/api/settings"){
+    if(b){const c=DB.cfg;
+      if("name" in b)c.name=String(b.name).trim().slice(0,30)||"দীপান্বিতা";
+      if(b.gender==="female"||b.gender==="male")c.gender=b.gender;
+      if(["auto","light","dark"].includes(b.theme))c.theme=b.theme;
+      if("user_name" in b)c.user_name=String(b.user_name).trim().slice(0,30);dsave()}
+    return Object.assign({},DB.cfg);
+  }
+  if(path==="/api/keys"){
+    if(!b)return{keys:DB.keys.map((k,i)=>({id:k.id,provider:k.provider,name:k.name||PN[k.provider]||"API",model:k.model||"",masked:dmask(k.key),enabled:k.enabled,search:!!k.search,cooldown:0,active:i===0})),max:50};
+    const a=b.action,ks=DB.keys;
+    if(a==="add"){const k=String(b.key||"").trim();
+      if(k.length<8||/\s/.test(k))return{ok:false,err:"key ঠিক নেই — পুরোটা কপি করেছ?"};
+      if(ks.some(x=>x.key===k&&x.model===b.model))return{ok:false,err:"এই key আর মডেল আগেই যোগ করা আছে"};
+      ks.push({id:Date.now(),provider:b.provider,name:(b.name||"").trim()||PN[b.provider]||"API",model:(b.model||"").trim(),search:!!b.search,key:k,enabled:true})}
+    else if(a==="edit"){const x=ks.find(x=>x.id===b.id);if(x){if(b.name)x.name=b.name;if(b.model)x.model=b.model;x.search=!!b.search}}
+    else if(a==="default"){const i=ks.findIndex(x=>x.id===b.id);if(i>0)ks.unshift(ks.splice(i,1)[0])}
+    else if(a==="search"){const x=ks.find(x=>x.id===b.id);if(x)x.search=!x.search}
+    else if(a==="delete")DB.keys=ks.filter(x=>x.id!==b.id);
+    else if(a==="toggle"){const x=ks.find(x=>x.id===b.id);if(x)x.enabled=!x.enabled}
+    else if(a==="move"){const i=ks.findIndex(x=>x.id===b.id),j=i+(b.dir==="up"?-1:1);if(i>=0&&j>=0&&j<ks.length)[ks[i],ks[j]]=[ks[j],ks[i]]}
+    else if(a==="test")return{ok:true,msg:"ডেমো মোড: আসল টেস্ট অ্যাপে হবে"};
+    dsave();return{ok:true};
+  }
+  if(path==="/api/sessions"){
+    if(!b){const qq=(q.get("q")||"").trim().toLowerCase();
+      const list=DB.sess.filter(x=>x.title&&(!qq||x.title.toLowerCase().includes(qq)||x.msgs.some(m=>m.text.toLowerCase().includes(qq)))).sort((x,y)=>y.ts-x.ts)
+        .map(x=>({id:x.id,title:x.title,ts:x.ts,active:x.id===DB.active}));return{sessions:list,active:DB.active}}
+    if(b.action==="new"){if(dcur().msgs.length){const id=Date.now();DB.sess=DB.sess.filter(x=>x.title||x.id===DB.active);DB.sess.unshift({id,title:"",ts:Date.now(),msgs:[]});DB.active=id}}
+    else if(b.action==="open"){if(DB.sess.find(x=>x.id===b.id)){DB.active=b.id;DB.sess=DB.sess.filter(x=>x.title||x.id===DB.active)}}
+    else if(b.action==="delete"){DB.sess=DB.sess.filter(x=>x.id!==b.id);dload()}
+    else if(b.action==="rename"){const x=DB.sess.find(x=>x.id===b.id),t=String(b.title||"").trim().slice(0,60);if(x&&t)x.title=t}
+    dsave();return{ok:true};
+  }
+  if(path==="/api/send"){const sess=dcur(),m=dpush("user",String(b.text||"").slice(0,4000),sess);dTyping=true;
+    setTimeout(()=>{dpush("bot",dreply(b.text),sess);dTyping=false},900);return{msg:m}}
+  if(path==="/api/clear"){DB.sess=DB.sess.filter(x=>x.id!==DB.active);dload();dsave();return{ok:true}}
+  throw new Error("HTTP 404");
+}
+
+/* মার্কডাউন */
+function inl(s){return s.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1">$1</a>')}
+function md(t){
+  return t.split(/```[\w-]*\n?/).map((p,i)=>i%2?`<pre><code>${esc(p.replace(/\n$/,""))}</code></pre>`:
+    esc(p).split("\n").map(l=>{
+      if(!l.trim())return'<div class="spc"></div>';
+      if(/^#{1,3} /.test(l))return`<div class="h">${inl(l.replace(/^#+ /,""))}</div>`;
+      if(l.startsWith("&gt; "))return`<div class="q">${inl(l.slice(5))}</div>`;
+      return`<div>${inl(l)}</div>`}).join("")).join("");
+}
+function copy(t){
+  const fb=()=>{const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy");toast("কপি হয়েছে")}catch(e){toast("কপি হয়নি")}a.remove()};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast("কপি হয়েছে"),fb);else fb();
+}
+
+/* চ্যাট */
+const nearBottom=()=>{const l=$("#list");return l.scrollHeight-l.scrollTop-l.clientHeight<150};
+const bottom=()=>{const l=$("#list");l.scrollTop=l.scrollHeight};
+function updEmpty(){const has=$("#list .m:not(#dots)");$("#empty").style.display=has?"none":"flex"}
+function add(m){
+  if(m.id<=last)return;last=m.id;
+  const d=document.createElement("div");d.className="m "+m.role;
+  if(m.role==="user")d.textContent=m.text;
+  else{d.innerHTML=`<span class="pf"><svg class="star"><use href="#star"/></svg></span><div class="tx">${md(m.text)}</div><div class="acts"><button aria-label="কপি">${I("copy")}</button></div>`;
+    d.querySelector(".acts button").onclick=()=>copy(m.text)}
+  $("#list").insertBefore(d,$("#dots"));
+}
+function setTyping(on){$("#dots").style.display=on?"block":"none"}
+async function poll(){
+  if(busy){again=true;return}
+  busy=true;
+  do{again=false;
+    try{
+      const r=await api("/api/messages?after="+last+"&sid="+sid,null,8000);
+      fails=0;if(!DEMO)$("#conn").hidden=true;
+      if(r.reset){$$("#list .m:not(#dots)").forEach(n=>n.remove());last=0;sid=r.sid}
+      const nb=r.reset||nearBottom();
+      r.messages.forEach(add);setTyping(r.typing);updEmpty();
+      if((r.messages.length||r.typing)&&nb)bottom();
+    }catch(e){if(++fails>=3)$("#conn").hidden=false}
+  }while(again);
+  busy=false;
+}
+async function send(text){
+  text=(text===undefined?$("#inp").value:text).trim();if(!text)return;
+  $("#inp").value="";grow();
+  try{const r=await api("/api/send",{text});if(r.msg){add(r.msg);setTyping(true);updEmpty();bottom()}}
+  catch(e){toast("পাঠানো যায়নি: "+e.message);$("#inp").value=text;grow()}
+}
+function grow(){const i=$("#inp");i.style.height="auto";i.style.height=Math.min(i.scrollHeight,140)+"px";$("#snd").disabled=!i.value.trim()}
+
+/* নেভিগেশন: ফোনের back বাটন সব জায়গায় কাজ করে */
+function show(v){$$(".page").forEach(p=>p.classList.toggle("on",p.id==="p-"+v));if(v==="adv")loadKeys();if(v==="settings")subs()}
+function applyState(s){s=s||{v:"chat"};show(s.v);ui.drawer=!!s.d;ui.sheet=!!s.s;
+  $("#drawer").classList.toggle("on",ui.drawer);$("#sheet").classList.toggle("on",ui.sheet);$("#scrim").classList.toggle("on",ui.drawer||ui.sheet)}
+window.onpopstate=e=>applyState(e.state);
+history.replaceState({v:"chat"},"");
+const overlay=()=>ui.drawer||ui.sheet;
+function nav(v){const s={v};if(overlay())history.replaceState(s,"");else history.pushState(s,"");applyState(s)}
+function openDrawer(){loadRecents();history.pushState({v:"chat",d:1},"");applyState({v:"chat",d:1})}
+function openSheet(){history.pushState({v:"chat",s:1},"");applyState({v:"chat",s:1})}
+function closeOv(){if(overlay())history.back()}
+
+/* সেটিংস */
+const GL={female:"মেয়ে",male:"ছেলে"},TL={dark:"ডার্ক",light:"লাইট",auto:"ফোনের সেটিং"};
+function setTheme(t){try{localStorage.setItem("t",t)}catch(e){}rt(t)}
+function greet(){
+  const h=new Date().getHours(),n=cfg.user_name?", "+cfg.user_name:"";
+  const t=h<5?"শুভ রাত্রি":h<12?"শুভ সকাল":h<16?"শুভ দুপুর":h<19?"শুভ বিকেল":h<22?"শুভ সন্ধ্যা":"শুভ রাত্রি";
+  const alt=["বলো, আমি শুনছি","আজ কী নিয়ে কথা বলবে?","মন খুলে বলো","কী খবর আজ?"];
+  $("#g1").textContent=t+n;$("#g2").textContent=alt[new Date().getDate()%alt.length];
+}
+function subs(){
+  $("#s-char-s").textContent=cfg.name+" · "+GL[cfg.gender];$("#s-theme-s").textContent=TL[cfg.theme]||"";
+  $("#s-keys-s").textContent=keysN<0?"":keysN?keysN+"টা key যোগ করা":"এখনো কোনো key নেই";
+}
+function applyCfg(){
+  const ini=[...(cfg.name||"?")][0];
+  $("#nm").textContent=cfg.name;$("#av").textContent=ini;$("#d-av").textContent=ini;$("#d-nm").textContent=cfg.user_name||cfg.name;
+  $("#inp").placeholder=cfg.name+"-কে লেখো…";greet();subs();markTheme();
+}
+async function saveCfg(d,quiet){
+  try{const r=await api("/api/settings",d);if(r.err)throw new Error(r.err);cfg=r;applyCfg();if(!quiet)toast("সেভ হয়েছে ✓");return true}
+  catch(e){toast("সেভ হয়নি: "+e.message);return false}
+}
+function markG(){$$("#g-tiles .tile").forEach(b=>b.classList.toggle("on",b.dataset.g===draft.gender))}
+function openChar(){draft={gender:cfg.gender};$("#c-name").value=cfg.name;$("#c-user").value=cfg.user_name||"";$("#c-av").textContent=[...(cfg.name||"?")][0];markG();nav("char")}
+$$("#g-tiles .tile").forEach(b=>b.onclick=()=>{draft.gender=b.dataset.g;markG()});
+$("#c-save").onclick=async()=>{if(await saveCfg({name:$("#c-name").value,gender:draft.gender,user_name:$("#c-user").value}))history.back()};
+function markTheme(){$$("#t-list .it").forEach(b=>b.classList.toggle("on",b.dataset.t===cfg.theme))}
+$$("#t-list .it").forEach(b=>b.onclick=async()=>{
+  const t=b.dataset.t;cfg.theme=t;setTheme(t);markTheme();subs();   // সঙ্গে সঙ্গে ফোনে বদলে যায়
+  const ok=await saveCfg({theme:t},true);toast(ok?"থিম বদলেছে ✓":"থিম বদলেছে, তবে সার্ভারে সেভ হয়নি")});
+$("#ttl").onclick=openPick;$("#s-char").onclick=openChar;
+$("#s-theme").onclick=()=>nav("theme");$("#s-keys").onclick=()=>nav("adv");$("#s-guide").onclick=()=>nav("guide");
+$("#k-help").onclick=()=>nav("guide");$("#ban-go").onclick=()=>nav("adv");
+$("#s-mem").onclick=()=>{history.back();setTimeout(()=>send("/memory"),250)};
+$("#s-clr").onclick=async()=>{if(await ask("এই চ্যাট মুছে ফেলবে?")){await api("/api/clear",{});history.back();poll()}};
+$("#av").onclick=()=>nav("settings");
+
+/* ড্রয়ার ও শিট */
+async function loadRecents(q){
+  try{const r=await api("/api/sessions?q="+encodeURIComponent(q||""));
+    $("#rec").innerHTML=r.sessions.length?r.sessions.map(s=>`<div class="rw${s.active?" cur":""}" data-id="${s.id}"><span class="rt">${esc(s.title)}</span><button class="rm" data-del="${s.id}">${I("more")}</button></div>`).join(""):'<div class="note" style="margin-left:28px">কোনো চ্যাট নেই</div>'}catch(e){}
+}
+function openRMenu(btn){const id=+btn.dataset.del,row=btn.closest(".rw"),m=$("#rmenu"),rc=btn.getBoundingClientRect();
+  m.innerHTML=`<button data-a="ren">${I("new")}নাম বদলাও</button><button data-a="del" class="dg">${I("trash")}মুছে ফেলো</button>`;
+  m.classList.add("on");const w=m.offsetWidth,h=m.offsetHeight;let top=rc.bottom+4;if(top+h>innerHeight-8)top=rc.top-h-4;
+  m.style.top=Math.max(8,top)+"px";m.style.left=Math.max(8,Math.min(rc.right-w,innerWidth-w-8))+"px";
+  m.onclick=async e=>{const b=e.target.closest("button");if(!b)return;m.classList.remove("on");
+    if(b.dataset.a==="ren"){const t=await askText("চ্যাটের নতুন নাম",row.querySelector(".rt").textContent);if(t){await api("/api/sessions",{action:"rename",id,title:t});loadRecents($("#q").value)}}
+    else if(await ask("এই চ্যাট মুছবে?")){await api("/api/sessions",{action:"delete",id});loadRecents($("#q").value);poll()}}}
+document.addEventListener("click",e=>{if(!e.target.closest("#rmenu")&&!e.target.closest("[data-del]"))$("#rmenu").classList.remove("on")});
+$("#rec").onclick=async e=>{
+  const del=e.target.closest("[data-del]");if(del){openRMenu(del);return}
+  const r=e.target.closest(".rw");if(r){await api("/api/sessions",{action:"open",id:+r.dataset.id});closeOv();poll()}
+};
+let qt;$("#q").oninput=()=>{clearTimeout(qt);qt=setTimeout(()=>loadRecents($("#q").value),250)};
+async function newChat(){try{await api("/api/sessions",{action:"new"})}catch(e){}closeOv();await poll();$("#inp").focus()}
+$("#menu").onclick=openDrawer;$("#scrim").onclick=closeOv;$("#d-x").onclick=closeOv;
+$("#d-new").onclick=newChat;$("#newc").onclick=newChat;$("#d-set").onclick=()=>nav("settings");
+$$("[data-q]").forEach(b=>b.onclick=()=>{closeOv();setTimeout(()=>send(b.dataset.q),200)});
+const TOOLS=[["new","নোট লেখো","নোট: "],["note","নোট দেখো",null,"নোট দেখাও"],["alarm","মনে করাও","মনে করাও "],
+  ["calc","হিসাব","হিসাব: "],["search","সার্চ","সার্চ "],["book","ডায়েরি","ডায়েরি: "],["bulb","কুইজ",null,"কুইজ"],["text","নতুন শব্দ",null,"শব্দ শেখাও"],["smile","মুড","মুড: "],["clip","ছবি/ফাইল",null,null,1]];
+const TC=["#5b8cff","#a470ff","#ff9f43","#2ecc9a","#38bdf8","#f5b324","#ff7ab0","#7c83ff","#ff6b81","#8aa4ff"];
+$("#tiles").innerHTML=TOOLS.map((t,i)=>`<button data-k="${i}"><span class="tb" style="color:${TC[i]};background:${TC[i]}26;box-shadow:inset 0 0 0 1px ${TC[i]}38">${I(t[0])}</span>${t[1]}</button>`).join("");
+$("#tiles").onclick=e=>{const b=e.target.closest("[data-k]");if(!b)return;const t=TOOLS[+b.dataset.k];closeOv();if(t[4]){setTimeout(pickFile,200);return}
+  setTimeout(()=>{if(t[3])send(t[3]);else{$("#inp").value=t[2];grow();$("#inp").focus()}},200)};
+$("#plus").onclick=openSheet;
+const CH=[["নোট: ","fill"],["মনে করাও ","fill"],["কুইজ","send"],["সার্চ ","fill"]];
+$("#chips").innerHTML=CH.map((c,i)=>`<button data-c="${i}">${c[0].trim()}</button>`).join("");
+$("#chips").onclick=e=>{const b=e.target.closest("[data-c]");if(!b)return;const c=CH[+b.dataset.c];if(c[1]==="send")send(c[0]);else{$("#inp").value=c[0];grow();$("#inp").focus()}};
+
+/* প্রোফাইল ছবি: ওপরের গোল আইকন, ড্রয়ার, চরিত্র পাতা ও বটের মেসেজের পাশে একই ছবি */
+let AVV=0;const WV=/;\s*wv\)/.test(navigator.userAgent);
+function avSet(u){const r=document.documentElement;if(u){r.style.setProperty("--avu",`url("${u}")`);r.classList.add("hasav")}else{r.classList.remove("hasav");r.style.removeProperty("--avu")}}
+async function avLoad(){
+  if(DEMO){let u="";try{u=localStorage.getItem("av")||""}catch(e){}avSet(u);return}
+  try{const r=await api("/api/avatar");if(r.v!==AVV){AVV=r.v;avSet(r.v?`/avatar.jpg?t=${TOKEN}&v=${r.v}`:"")}}catch(e){}
+}
+async function avPick(){
+  if(DEMO||!WV){$("#av-file").click();return}
+  try{await api("/api/pick",{purpose:"avatar"});toast("ছবি বাছাই করো…");
+    for(let i=0;i<60;i++){await new Promise(r=>setTimeout(r,2000));const r=await api("/api/avatar");if(r.v!==AVV){await avLoad();toast("ছবি সেট হয়েছে ✓");return}}
+  }catch(e){toast(e.message)}
+}
+async function avClear(){
+  if(DEMO){try{localStorage.removeItem("av")}catch(e){}avSet("");toast("ছবি সরানো হয়েছে");return}
+  try{await api("/api/avatar_clear",{});AVV=0;avSet("");toast("ছবি সরানো হয়েছে")}catch(e){toast(e.message)}
+}
+$("#av-file").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  const im=new Image();im.onload=async()=>{const c=document.createElement("canvas");c.width=c.height=256;const s=Math.min(im.width,im.height);
+    c.getContext("2d").drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);const u=c.toDataURL("image/jpeg",.85);
+    if(DEMO){try{localStorage.setItem("av",u)}catch(x){}avSet(u)}else{try{await api("/api/avatar_set",{data:u});await avLoad()}catch(x){toast(x.message);return}}
+    toast("ছবি সেট হয়েছে ✓")};im.src=URL.createObjectURL(f)};
+$("#c-ph").onclick=avPick;$("#c-av").onclick=avPick;$("#c-ph-x").onclick=avClear;
+
+/* মডেল বাছাই (চ্যাটের ওপরের নামে চাপলে) */
+async function openPick(){
+  const m=$("#mpick");if(m.classList.contains("on")){m.classList.remove("on");return}
+  let r;try{r=await api("/api/keys")}catch(e){toast(e.message);return}
+  const ks=r.keys.filter(k=>k.enabled);
+  m.innerHTML=(ks.length?ks.map(k=>`<button data-id="${k.id}"><span><b>${esc(k.name||"API")}</b><small>${k.model?esc(k.model):"মডেল সেট করা হয়নি"}${k.cooldown>0?" · লিমিট শেষ":""}${k.search?" · 🔎":""}</small></span>${k.active?'<span class="ck">✓</span>':""}</button>`).join(""):'<div style="padding:12px 14px;color:var(--mu)">এখনো কোনো API নেই</div>');
+  m.classList.add("on");
+}
+$("#mpick").onclick=async e=>{const b=e.target.closest("button");if(!b)return;$("#mpick").classList.remove("on");
+  if(b.dataset.go){nav("adv");return}
+  try{await api("/api/keys",{action:"default",id:+b.dataset.id});toast("ডিফল্ট মডেল বদলেছে ✓");loadKeys()}catch(x){toast(x.message)}};
+document.addEventListener("click",e=>{if(!e.target.closest("#mpick,#ttl"))$("#mpick").classList.remove("on")});
+
+/* key ম্যানেজার */
+async function loadKeys(){
+  try{
+    const r=await api("/api/keys");window.KS=r.keys;keysN=r.keys.length;$("#mx").textContent=r.max;$("#ban").hidden=keysN>0;subs();
+    $("#kl").innerHTML=r.keys.length?r.keys.map((k,i)=>{
+      const nm=k.name||PN[k.provider]||"API",
+      st=!k.enabled?'<span class="chip o">বন্ধ</span>':k.cooldown>0?`<span class="chip w">লিমিট শেষ ~${Math.ceil(k.cooldown/60)} মিনিট</span>`:k.active?'<span class="chip">চলছে ✓</span>':'<span class="chip">প্রস্তুত</span>';
+      return`<div class="kc"><div class="kh"><span class="pv">${esc([...String(nm)][0]||"A")}</span><div class="t"><b>${i+1}. ${esc(nm)}${i===0?" · ডিফল্ট":""}</b><small>${k.model?esc(k.model):"মডেল সেট করা হয়নি"} · ${esc(k.masked)}${k.search?" · 🔎 সার্চ":""}</small></div>${st}</div>
+      <div class="ka">${i?`<button data-a="default" data-id="${k.id}">ব্যবহার করো</button>`:""}<button data-a="move" data-id="${k.id}" data-d="up">↑</button><button data-a="move" data-id="${k.id}" data-d="down">↓</button><button data-a="search" data-id="${k.id}">🔎 ${k.search?"বন্ধ":"চালু"}</button><button data-a="edit" data-id="${k.id}">✎ মডেল</button><button data-a="test" data-id="${k.id}">টেস্ট</button><button data-a="toggle" data-id="${k.id}">${k.enabled?"বন্ধ করো":"চালু করো"}</button><button data-a="delete" data-id="${k.id}" style="color:var(--er)">মুছো</button></div></div>`}).join(""):'<div class="kc mu">এখনো কোনো key নেই। নিচে যোগ করো।</div>';
+    $("#k-add").disabled=r.keys.length>=r.max;
+  }catch(e){toast("key তালিকা আনা যায়নি: "+e.message)}
+}
+$("#kl").onclick=async e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;const id=+b.dataset.id,a=b.dataset.a;
+  if(a==="delete"&&!await ask("এই key মুছবে?"))return;
+  if(a==="edit"){const k=(window.KS||[]).find(x=>x.id===id);if(!k)return;window.edId=id;$("#k-name").value=k.name||"";$("#k-model").value=k.model||"";$("#k-search").checked=!!k.search;$("#k-key").style.display="none";$("#k-prov").style.display="none";$("#k-url").style.display="none";$("#k-add").textContent="সেভ করো";$("#k-name").scrollIntoView({block:"center"});$("#k-model").focus();return}
+  if(a==="test"){toast("টেস্ট চলছে…");try{const r=await api("/api/keys",{action:"test",id},30000);toast(r.ok?r.msg:r.err)}catch(x){toast(x.message)}return}
+  try{await api("/api/keys",{action:a,id,dir:b.dataset.d})}catch(x){toast(x.message)}loadKeys();
+};
+$("#k-add").onclick=async()=>{
+  if(window.edId){try{await api("/api/keys",{action:"edit",id:window.edId,name:$("#k-name").value,model:$("#k-model").value,search:$("#k-search").checked});toast("সেভ হয়েছে ✓")}catch(e){toast(e.message)}
+    window.edId=0;$("#k-key").style.display="";$("#k-prov").style.display="";$("#k-prov").onchange();$("#k-add").textContent="যোগ করো";$("#k-name").value="";$("#k-model").value="";$("#k-search").checked=false;loadKeys();return}
+  try{const r=await api("/api/keys",{action:"add",provider:$("#k-prov").value,name:$("#k-name").value,model:$("#k-model").value,url:$("#k-url").value,search:$("#k-search").checked,key:$("#k-key").value});
+    if(r.ok){$("#k-key").value="";$("#k-name").value="";$("#k-model").value="";toast("key যোগ হয়েছে ✓");loadKeys()}else toast(r.err)}catch(e){toast(e.message)}
+};
+const PM={groq:"openai/gpt-oss-120b",gemini:"gemini-flash-latest",mistral:"mistral-large-latest",openrouter:"openai/gpt-oss-120b:free",openai:"gpt-4o-mini",deepseek:"deepseek-chat"};
+$("#k-prov").onchange=()=>{const p=$("#k-prov").value;$("#k-url").style.display=p==="custom"?"":"none";$("#k-model").placeholder=PM[p]?"মডেল (ফাঁকা = "+PM[p]+")":"মডেলের নাম লেখো"};
+$("#k-unb").onclick=async()=>{try{await api("/api/keys",{action:"unblock"});toast("সীমা রিসেট হয়েছে");loadKeys()}catch(e){toast(e.message)}};
+
+$("#inp").oninput=grow;$("#snd").onclick=()=>send();
+$("#list").onscroll=()=>$("#dn").classList.toggle("on",!nearBottom()&&!!$("#list .m:not(#dots)"));
+$("#dn").onclick=bottom;
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{if(cfg.theme==="auto")rt("auto")})}catch(e){}
+
+(async()=>{
+  $$("[data-i]").forEach(e=>e.insertAdjacentHTML("afterbegin",I(e.dataset.i)));
+  avLoad();if(DEMO){dload();const c=$("#conn");c.textContent="ডেমো মোড — এখানে শুধু ডিজাইন ও বাটন পরীক্ষা হয়, আসল AI উত্তর APK/Termux-এ";c.classList.add("demo");c.hidden=false}
+  applyCfg();updEmpty();
+  try{cfg=Object.assign(cfg,await api("/api/settings"));setTheme(cfg.theme);applyCfg()}catch(e){toast("সেটিংস আনা যায়নি: "+e.message)}
+  loadKeys();await poll();bottom();
+  setInterval(poll,1200);
+})();
+</script>
+</body>
+</html>

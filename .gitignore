@@ -1,0 +1,6 @@
+.buildozer/
+bin/
+__pycache__/
+settings.json
+*.pyc
+ui_token.txt
