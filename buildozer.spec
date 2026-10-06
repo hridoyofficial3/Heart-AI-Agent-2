@@ -1,23 +1,22 @@
 [app]
-title = Dipanwita Bot
-package.name = dipanwita
+title = Heart AI
+package.name = heartai
 package.domain = org.heart
 source.dir = .
-source.include_exts = py,json,html
-version = 1.0
-requirements = python3==3.11.5,hostpython3==3.11.5,kivy==2.3.0,requests,urllib3,chardet,idna,certifi,pypdf,charset-normalizer
+source.include_exts = py,png,jpg,kv,atlas,json,html,xml,txt
+version = 1.0.0
+requirements = python3,kivy==2.2.1,requests,urllib3,pypdf,certifi,openssl
 orientation = portrait
 fullscreen = 0
-services = Bot:service.py:foreground:sticky
-android.permissions = INTERNET,FOREGROUND_SERVICE,WAKE_LOCK,POST_NOTIFICATIONS,REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+android.presplash_color = #121214
+android.permissions = INTERNET,POST_NOTIFICATIONS,READ_EXTERNAL_STORAGE,READ_MEDIA_IMAGES
 android.api = 33
-android.ndk = 25b
-android.ndk_api = 24
-p4a.branch = v2024.01.21
 android.minapi = 24
-android.archs = arm64-v8a
+android.ndk = 25b
 android.accept_sdk_license = True
-android.extra_manifest_application_arguments = ./app_args.xml
+android.extra_manifest_xml = ./app_args.xml
+android.archs = arm64-v8a, armeabi-v7a
+services = Bot:service.py
 
 [buildozer]
 log_level = 2
